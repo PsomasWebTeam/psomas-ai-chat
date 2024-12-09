@@ -555,6 +555,12 @@ const Chat = () => {
         setIsIntentsPanelOpen(false)
         setMessages([])
       }
+    } else {
+      // Handle case when CosmosDB is not available
+      setActiveCitation(undefined)
+      setIsCitationPanelOpen(false)
+      setIsIntentsPanelOpen(false)
+      setMessages([])
     }
     setClearingChat(false)
   }

@@ -45,13 +45,14 @@ class CosmosConversationClient():
             
         return True, "CosmosDB client initialized successfully"
 
-    async def create_conversation(self, user_id, title = ''):
+    async def create_conversation(self, user_id, title = '', user_name = ''):
         conversation = {
             'id': str(uuid.uuid4()),  
             'type': 'conversation',
             'createdAt': datetime.utcnow().isoformat(),  
             'updatedAt': datetime.utcnow().isoformat(),  
             'userId': user_id,
+            'userName': user_name,
             'title': title
         }
         ## TODO: add some error handling based on the output of the upsert_item call
@@ -69,12 +70,15 @@ class CosmosConversationClient():
             return False
 
     async def delete_conversation(self, user_id, conversation_id):
-        conversation = await self.container_client.read_item(item=conversation_id, partition_key=user_id)        
+        conversation = await self.get_conversation(user_id, conversation_id)        
         if conversation:
-            resp = await self.container_client.delete_item(item=conversation_id, partition_key=user_id)
-            return resp
-        else:
-            return True
+            try:
+                resp = await self.container_client.delete_item(item=conversation_id, partition_key=user_id)
+                return resp
+            except exceptions.CosmosResourceNotFoundError:
+                # Return True if conversation was already deleted
+                return True
+        return True
 
         
     async def delete_messages(self, conversation_id, user_id):
@@ -83,8 +87,13 @@ class CosmosConversationClient():
         response_list = []
         if messages:
             for message in messages:
-                resp = await self.container_client.delete_item(item=message['id'], partition_key=user_id)
-                response_list.append(resp)
+                    try:
+                        resp = await self.container_client.delete_item(item=message['id'], partition_key=user_id)
+                        response_list.append(resp)
+                    except:
+                        # Skip messages that don't exist
+                        continue
+                            
             return response_list
 
 
@@ -95,7 +104,7 @@ class CosmosConversationClient():
                 'value': user_id
             }
         ]
-        query = f"SELECT * FROM c where c.userId = @userId and c.type='conversation' order by c.updatedAt {sort_order}"
+        query = f"SELECT c.id, c.type, c.createdAt, c.updatedAt, c.userId, c.userName, c.title FROM c where c.userId = @userId and c.type='conversation' order by c.updatedAt {sort_order}"
         if limit is not None:
             query += f" offset {offset} limit {limit}" 
         
@@ -116,7 +125,7 @@ class CosmosConversationClient():
                 'value': user_id
             }
         ]
-        query = f"SELECT * FROM c where c.id = @conversationId and c.type='conversation' and c.userId = @userId"
+        query = f"SELECT c.id, c.type, c.createdAt, c.updatedAt, c.userId, c.userName, c.title FROM c where c.id = @conversationId and c.type='conversation' and c.userId = @userId"
         conversations = []
         async for item in self.container_client.query_items(query=query, parameters=parameters):
             conversations.append(item)
@@ -127,11 +136,12 @@ class CosmosConversationClient():
         else:
             return conversations[0]
  
-    async def create_message(self, uuid, conversation_id, user_id, input_message: dict):
+    async def create_message(self, uuid, conversation_id, user_id, input_message: dict, user_name = ''):
         message = {
             'id': uuid,
             'type': 'message',
             'userId' : user_id,
+            'userName' : user_name,
             'createdAt': datetime.utcnow().isoformat(),
             'updatedAt': datetime.utcnow().isoformat(),
             'conversationId' : conversation_id,
@@ -174,7 +184,7 @@ class CosmosConversationClient():
                 'value': user_id
             }
         ]
-        query = f"SELECT * FROM c WHERE c.conversationId = @conversationId AND c.type='message' AND c.userId = @userId ORDER BY c.timestamp ASC"
+        query = f"SELECT c.id, c.type, c.userId, c.userName, c.createdAt, c.updatedAt, c.conversationId, c.role, c.content, c.feedback FROM c WHERE c.conversationId = @conversationId AND c.type='message' AND c.userId = @userId ORDER BY c.createdAt ASC"
         messages = []
         async for item in self.container_client.query_items(query=query, parameters=parameters):
             messages.append(item)
