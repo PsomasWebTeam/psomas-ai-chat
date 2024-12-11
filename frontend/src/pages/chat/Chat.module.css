@@ -2,17 +2,16 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
+  height: 100vh;
 }
 
 .chatRoot {
   flex: 1;
   display: flex;
-  margin-top: 0px;
-  margin-bottom: 20px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin: 0;
   gap: 5px;
+  flex-direction: row;
 }
 
 .chatContainer {
@@ -21,12 +20,23 @@
   flex-direction: column;
   align-items: center;
   background: radial-gradient(108.78% 108.78% at 50.02% 19.78%, #ffffff 57.29%, #eef6fe 100%);
-  box-shadow:
-    0px 2px 4px rgba(0, 0, 0, 0.14),
-    0px 0px 2px rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
   overflow-y: auto;
-  max-height: calc(100vh - 100px);
+  height: 100vh;
+  padding-top: 48px;
+  order: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chatEmptyState {
@@ -35,6 +45,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-top: 48px;
 }
 
 .chatEmptyStateTitle {
@@ -47,6 +58,9 @@
   line-height: 24px;
   margin-top: 36px;
   margin-bottom: 0px;
+  animation: fadeIn 0.8s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
 }
 
 .chatEmptyStateSubtitle {
@@ -59,11 +73,17 @@
   text-align: center;
   letter-spacing: -0.01em;
   color: #616161;
+  animation: fadeIn 0.8s ease-out forwards;
+  animation-delay: 0.1s;
+  opacity: 0;
 }
 
 .chatIcon {
-  height: 62px;
+  height: 80px;
   width: auto;
+  animation: fadeIn 1.6s ease-out forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
 }
 
 .chatMessageStream {
@@ -211,8 +231,6 @@
   height: 32px;
   left: calc(50% - 161px / 2 + 25.8px);
   bottom: 116px;
-  border: 1px solid #d1d1d1;
-  border-radius: 16px;
 }
 
 .stopGeneratingIcon {
@@ -248,16 +266,26 @@
     0px 0px 2px rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   flex: auto;
-  order: 0;
+  order: 1;
   align-self: stretch;
   flex-grow: 0.3;
   max-width: 30%;
-  overflow-y: scroll;
-  max-height: calc(100vh - 100px);
+  height: 100vh;
+  overflow-y: auto;
+  margin-top: 0;
+  padding-top: 48px;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .citationPanelHeaderContainer {
   width: 100%;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 3;
+  padding: 16px 0;
 }
 
 .citationPanelHeader {

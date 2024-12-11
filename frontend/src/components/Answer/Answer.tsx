@@ -45,9 +45,9 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
     appStateContext?.state.frontendSettings?.feedback_enabled && appStateContext?.state.isCosmosDBAvailable?.cosmosDB
   const SANITIZE_ANSWER = appStateContext?.state.frontendSettings?.sanitize_answer
 
-  const handleChevronClick = () => {
-    setChevronIsExpanded(!chevronIsExpanded)
+  const handleAccordionClick = () => {
     toggleIsRefAccordionOpen()
+    setChevronIsExpanded(!isRefAccordionOpen)
   }
 
   useEffect(() => {
@@ -299,55 +299,38 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
         )}
         <Stack horizontal className={styles.answerFooter}>
           {!!parsedAnswer?.citations.length && (
-            <Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
-              <Stack style={{ width: '100%' }}>
-                <Stack horizontal horizontalAlign="start" verticalAlign="center">
-                  <Text
-                    className={styles.accordionTitle}
-                    onClick={toggleIsRefAccordionOpen}
-                    aria-label="Open references"
-                    tabIndex={0}
-                    role="button">
-                    <span>
-                      {parsedAnswer.citations.length > 1
-                        ? parsedAnswer.citations.length + ' references'
-                        : '1 reference'}
-                    </span>
-                  </Text>
-                  <FontIcon
-                    className={styles.accordionIcon}
-                    onClick={handleChevronClick}
-                    iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
-                  />
-                </Stack>
-              </Stack>
-            </Stack.Item>
+            <div 
+              className={styles.accordionContainer}
+              onClick={handleAccordionClick}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? handleAccordionClick() : null)}
+              role="button"
+              tabIndex={0}
+              aria-label="Toggle references">
+              <Text className={styles.accordionTitle}>
+                {parsedAnswer.citations.length > 1
+                  ? parsedAnswer.citations.length + ' references'
+                  : '1 reference'}
+              </Text>
+              <FontIcon
+                className={styles.accordionIcon}
+                iconName={chevronIsExpanded ? 'ChevronDown' : 'ChevronRight'}
+              />
+            </div>
           )}
           <Stack.Item className={styles.answerDisclaimerContainer}>
-            <span className={styles.answerDisclaimer}>AI-generated content may be incorrect</span>
+            <span className={styles.answerDisclaimer}>PsomasAI can make mistakes. Always check important info.</span>
           </Stack.Item>
           {!!answer.exec_results?.length && (
-            <Stack.Item onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? toggleIsRefAccordionOpen() : null)}>
-              <Stack style={{ width: '100%' }}>
-                <Stack horizontal horizontalAlign="start" verticalAlign="center">
-                  <Text
-                    className={styles.accordionTitle}
-                    onClick={() => onExectResultClicked(answer.message_id ?? '')}
-                    aria-label="Open Intents"
-                    tabIndex={0}
-                    role="button">
-                    <span>
-                      Show Intents
-                    </span>
-                  </Text>
-                  <FontIcon
-                    className={styles.accordionIcon}
-                    onClick={handleChevronClick}
-                    iconName={'ChevronRight'}
-                  />
-                </Stack>
-              </Stack>
-            </Stack.Item>
+            <div 
+              className={styles.accordionContainer}
+              onClick={() => onExectResultClicked(answer.message_id ?? '')}
+              onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? onExectResultClicked(answer.message_id ?? '') : null)}
+              role="button"
+              tabIndex={0}
+              aria-label="Show intents">
+              <Text className={styles.accordionTitle}>Show Intents</Text>
+              <FontIcon className={styles.accordionIcon} iconName={'ChevronRight'} />
+            </div>
           )}
         </Stack>
         {chevronIsExpanded && (

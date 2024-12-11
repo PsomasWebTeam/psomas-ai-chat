@@ -424,7 +424,7 @@ def get_frontend_settings():
         settings = frontend_settings.copy()
         
         # Update the chat_title with the user's name
-        settings["ui"]["chat_title"] = f"How can I help today, {user_name}?"
+        settings["ui"]["chat_title"] = f"How can I help today?"
         
         return jsonify(settings), 200
     except Exception as e:
