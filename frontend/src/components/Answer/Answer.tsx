@@ -35,6 +35,7 @@ export const Answer = ({ answer, onCitationClicked, onExectResultClicked }: Prop
   const filePathTruncationLimit = 50
 
   const parsedAnswer = useMemo(() => parseAnswer(answer), [answer])
+  console.log(parsedAnswer);
   const [chevronIsExpanded, setChevronIsExpanded] = useState(isRefAccordionOpen)
   const [feedbackState, setFeedbackState] = useState(initializeAnswerFeedback(answer))
   const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false)
