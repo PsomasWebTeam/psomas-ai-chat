@@ -416,18 +416,30 @@ async def conversation():
 @bp.route("/frontend_settings", methods=["GET"])
 def get_frontend_settings():
     try:
-        return jsonify(frontend_settings), 200
+        # Get authenticated user details
+        authenticated_user = get_authenticated_user_details(request.headers)
+        user_name = authenticated_user["user_name"]
+        
+        # Create a copy of the settings to modify
+        settings = frontend_settings.copy()
+        
+        # Update the chat_title with the user's name
+        settings["ui"]["chat_title"] = f"How can I help today?"
+        
+        return jsonify(settings), 200
     except Exception as e:
         logging.exception("Exception in /frontend_settings")
         return jsonify({"error": str(e)}), 500
-
+    
 
 ## Conversation History API ##
 @bp.route("/history/generate", methods=["POST"])
 async def add_conversation():
     await cosmos_db_ready.wait()
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
-    user_id = authenticated_user["user_principal_id"]
+    logging.debug(f"Authenticated user details: {authenticated_user}")
+    user_id = authenticated_user["user_principal_id"]  # Add this line to get user_id
+    user_name = authenticated_user["user_name"]
 
     ## check request for conversation_id
     request_json = await request.get_json()
@@ -443,7 +455,9 @@ async def add_conversation():
         if not conversation_id:
             title = await generate_title(request_json["messages"])
             conversation_dict = await current_app.cosmos_conversation_client.create_conversation(
-                user_id=user_id, title=title
+                user_id=user_id, 
+                title=title,
+                user_name=user_name
             )
             conversation_id = conversation_dict["id"]
             history_metadata["title"] = title
@@ -458,6 +472,7 @@ async def add_conversation():
                 conversation_id=conversation_id,
                 user_id=user_id,
                 input_message=messages[-1],
+                user_name=user_name
             )
             if createdMessageValue == "Conversation not found":
                 raise Exception(
@@ -484,6 +499,7 @@ async def update_conversation():
     await cosmos_db_ready.wait()
     authenticated_user = get_authenticated_user_details(request_headers=request.headers)
     user_id = authenticated_user["user_principal_id"]
+    user_name = authenticated_user["user_name"]
 
     ## check request for conversation_id
     request_json = await request.get_json()
@@ -509,6 +525,7 @@ async def update_conversation():
                     conversation_id=conversation_id,
                     user_id=user_id,
                     input_message=messages[-2],
+                    user_name=authenticated_user["user_name"]
                 )
             # write the assistant message
             await current_app.cosmos_conversation_client.create_message(
@@ -516,6 +533,7 @@ async def update_conversation():
                 conversation_id=conversation_id,
                 user_id=user_id,
                 input_message=messages[-1],
+                user_name=authenticated_user["user_name"]
             )
         else:
             raise Exception("No bot messages found")

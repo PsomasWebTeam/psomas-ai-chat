@@ -137,8 +137,13 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
       return
     }
     setRenameLoading(true)
-    const response = await historyRename(item.id, editTitle)
-    if (!response.ok) {
+    try {
+      const response = await historyRename(item.id, editTitle)
+      setRenameLoading(false)
+      setEdit(false)
+      appStateContext?.dispatch({ type: 'UPDATE_CHAT_TITLE', payload: { ...item, title: editTitle } as Conversation })
+      setEditTitle('')
+    } catch (error) {
       setErrorRename('Error: could not rename item')
       setTimeout(() => {
         setTextFieldFocused(true)
@@ -147,11 +152,7 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
           textFieldRef.current.focus()
         }
       }, 5000)
-    } else {
       setRenameLoading(false)
-      setEdit(false)
-      appStateContext?.dispatch({ type: 'UPDATE_CHAT_TITLE', payload: { ...item, title: editTitle } as Conversation })
-      setEditTitle('')
     }
   }
 
@@ -183,7 +184,6 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
       onClick={() => handleSelectItem()}
       onKeyDown={e => (e.key === 'Enter' || e.key === ' ' ? handleSelectItem() : null)}
       verticalAlign="center"
-      // horizontal
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       styles={{
@@ -204,7 +204,6 @@ export const ChatHistoryListItemCell: React.FC<ChatHistoryListItemCellProps> = (
                     placeholder={item.title}
                     onChange={chatHistoryTitleOnChange}
                     onKeyDown={handleKeyPressEdit}
-                    // errorMessage={errorRename}
                     disabled={errorRename ? true : false}
                   />
                 </Stack.Item>
@@ -323,16 +322,19 @@ export const ChatHistoryListItemGroups: React.FC<ChatHistoryListItemGroupsProps>
     const currentChatHistory = appStateContext?.state.chatHistory
     setShowSpinner(true)
 
-    await historyList(offset).then(response => {
+    try {
+      const response = await historyList()
       const concatenatedChatHistory = currentChatHistory && response && currentChatHistory.concat(...response)
       if (response) {
         appStateContext?.dispatch({ type: 'FETCH_CHAT_HISTORY', payload: concatenatedChatHistory || response })
       } else {
         appStateContext?.dispatch({ type: 'FETCH_CHAT_HISTORY', payload: null })
       }
+    } catch (error) {
+      appStateContext?.dispatch({ type: 'FETCH_CHAT_HISTORY', payload: null })
+    } finally {
       setShowSpinner(false)
-      return response
-    })
+    }
   }
 
   useEffect(() => {

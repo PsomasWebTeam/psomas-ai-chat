@@ -2,12 +2,14 @@
   width: 86px;
   height: 32px;
   border-radius: 4px;
-  background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0f6cbd 33.63%, #2d87c3 70.31%, #8dddd8 100%);
+  /*background: radial-gradient(109.81% 107.82% at 100.1% 90.19%, #0f6cbd 33.63%, #2d87c3 70.31%, #8dddd8 100%);*/
+  background: #ffffff;
   padding: 5px 12px;
 }
 
 .shareButtonRoot:hover {
-  background: linear-gradient(135deg, #0f6cbd 0%, #2d87c3 51.04%, #8dddd8 100%);
+/* background: linear-gradient(135deg, #0f6cbd 0%, #2d87c3 51.04%, #8dddd8 100%); */  
+  background: #ffffff;
 }
 
 .shareButtonRoot span {
@@ -23,8 +25,13 @@
 }
 
 .historyButtonRoot {
-  width: 180px;
-  border: 1px solid #d1d1d1;
+  width: 32px;
+  height: 32px;
+  border: 0px solid #d1d1d1;
+  padding: 0;
+  min-width: 32px;
+  margin: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .historyButtonRoot:hover {
@@ -39,10 +46,5 @@
   .shareButtonRoot {
     width: auto;
     padding: 5px 8px;
-  }
-
-  .historyButtonRoot {
-    width: auto;
-    padding: 0 8px;
   }
 }
